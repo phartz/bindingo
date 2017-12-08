@@ -139,7 +139,7 @@ func WriteResponse(w http.ResponseWriter, value string, message string) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func main() {
+func startServer() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/service_instance/{dataService}/{id}/status", GetStatus).Methods("GET")
@@ -152,4 +152,12 @@ func main() {
 		port = "3000"
 	}
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), router))
+}
+
+func main() {
+	RegisteredServices = make(map[string]func() IDataService)
+	RegisteredServices["a9s_mongodb"] = CreateMongoDB
+	RegisteredServices["a9s_redis"] = CreateRedis
+
+	startServer()
 }

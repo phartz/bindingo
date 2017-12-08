@@ -95,3 +95,7 @@ func (d DataServiceRedis) Delete(credentials *Credentials, value string) error {
 
 	return nil
 }
+
+func CreateRedis() IDataService {
+	return DataServiceRedis{}
+}

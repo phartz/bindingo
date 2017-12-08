@@ -174,3 +174,7 @@ func (d DataServiceMongoDB) delete(database *mgo.Database, value string) (err er
 
 	return coll.Remove(value)
 }
+
+func CreateMongoDB() IDataService {
+	return DataServiceMongoDB{}
+}
