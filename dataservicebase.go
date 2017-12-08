@@ -9,13 +9,13 @@ import (
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 )
 
-func GetCredentials(params *map[strin]string) (*map[string]interface{}, error) {
+type Credentials map[string]interface{}
+
+func GetCredentials(id string, credentialsParam string) (*Credentials, error) {
 	log.Println("SetCredentials!")
-	id := params["id"]
-	credentialsParam := params["credentials"]
 
 	if len(credentialsParam) > 0 {
-		credentials := make(map[string]interface{})
+		credentials := make(Credentials)
 		err := json.Unmarshal([]byte(credentialsParam), credentials)
 		if err != nil {
 			return nil, err
@@ -47,15 +47,16 @@ func GetCredentials(params *map[strin]string) (*map[string]interface{}, error) {
 		break
 	}
 
-	credentials := make(map[string]interface{})
+	credentials := make(Credentials)
 	for k, v := range service.Credentials {
 		credentials[k] = v
 	}
-
-	log.Println("print credentials")
-	for k, v := range credentials {
-		log.Printf("%s----%s", k, v)
-	}
-
 	return &credentials, nil
+	/*
+		log.Println("print credentials")
+		for k, v := range credentials {
+			log.Printf("%s----%s", k, v)
+		}
+
+		return &credentials, nil*/
 }

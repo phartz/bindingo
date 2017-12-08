@@ -14,6 +14,9 @@ func GetDataService(params map[string]string) (IDataService, error) {
 	case "a9s_mongodb":
 		service = DataServiceMongoDB{}
 		break
+	case "a9s_redis":
+		service = DataServiceRedis{}
+		break
 	default:
 		log.Printf("No class found for [%s]!\n", params["dataService"])
 	}

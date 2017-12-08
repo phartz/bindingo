@@ -1,8 +1,8 @@
 package main
 
 type IDataService interface {
-	GetStatus(string, string) (int, error)
-	Insert(string, string, string) error
-	Exists(string, string, string) (bool, error)
-	Delete(string, string, string) error
+	GetStatus(*Credentials) (int, error)
+	Insert(*Credentials, string) error
+	Exists(*Credentials, string) (bool, error)
+	Delete(*Credentials, string) error
 }

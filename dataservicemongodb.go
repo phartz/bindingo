@@ -25,23 +25,17 @@ type DataServiceMongoDB struct {
 }
 
 // Connect the drive to a MongoDB Instance with the given URL
-func (d DataServiceMongoDB) getSession() (*mgo.Session, error) {
-	log.Println("print credentials")
-	for k, v := range d.credentials {
-		log.Printf("%s----%s", k, v)
-	}
-
-	//d.PrintCredentials()
-
-	log.Printf("Create MongoDB session for [%s].\n", d.credentials["uri"].(string))
-	dialInfo, err := mgo.ParseURL(d.credentials["uri"].(string))
+func (d DataServiceMongoDB) getSession(credentials *Credentials) (*mgo.Session, error) {
+	log.Printf("Create MongoDB session for [%s].\n", (*credentials)["uri"].(string))
+	dialInfo, err := mgo.ParseURL((*credentials)["uri"].(string))
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	cacert := d.credentials["cacrt"].(string)
-	if len(cacert) > 0 {
+	if (*credentials)["cacrt"] != nil {
+		cacert := (*credentials)["cacrt"].(string)
+
 		tlsConfig := &tls.Config{}
 
 		roots := x509.NewCertPool()
@@ -67,10 +61,10 @@ func (d DataServiceMongoDB) getSession() (*mgo.Session, error) {
 	return session, err
 }
 
-func (d DataServiceMongoDB) getDatabase(session *mgo.Session) (*mgo.Database, error) {
+func (d DataServiceMongoDB) getDatabase(credentials *Credentials, session *mgo.Session) (*mgo.Database, error) {
 	log.Println("Get MongoDB database.")
-	database := session.DB(d.credentials["default_database"].(string))
-	err := database.Login(d.credentials["username"].(string), d.credentials["password"].(string))
+	database := session.DB((*credentials)["default_database"].(string))
+	err := database.Login((*credentials)["username"].(string), (*credentials)["password"].(string))
 	if err != nil {
 		return nil, err
 	}
@@ -78,21 +72,21 @@ func (d DataServiceMongoDB) getDatabase(session *mgo.Session) (*mgo.Database, er
 	return database, nil
 }
 
-func (d DataServiceMongoDB) GetStatus(id string, credentials string) (output int, err error) {
-	log.Println("1")
-	session, err := d.getSession()
+func (d DataServiceMongoDB) GetStatus(credentials *Credentials) (output int, err error) {
+	session, err := d.getSession(credentials)
 	if err != nil {
 		return 2, err
 	}
-	log.Println("2")
+
 	defer session.Close()
-	database, err := d.getDatabase(session)
+	database, err := d.getDatabase(credentials, session)
 	if err != nil {
 		return 2, err
 	}
-	log.Println("3")
+
 	err = d.insert(database, "testvalue")
 	if err != nil {
+		log.Println(err.Error())
 		return 2, err
 	}
 	log.Println("4")
@@ -113,25 +107,14 @@ func (d DataServiceMongoDB) GetStatus(id string, credentials string) (output int
 	return 1, nil
 }
 
-func (d DataServiceMongoDB) SetCredentials(id string, credentials string) error {
-	d.credentials = make(map[string]interface{})
-
-	creds, _ := d.SetCredentialsImpl(id, credentials)
-
-	for k, v := range *creds {
-		d.credentials[k] = v
-	}
-	return nil
-}
-
-func (d DataServiceMongoDB) Insert(id string, credentials string, value string) (err error) {
-	session, err := d.getSession()
+func (d DataServiceMongoDB) Insert(credentials *Credentials, value string) (err error) {
+	session, err := d.getSession(credentials)
 	if err != nil {
 		return err
 	}
 
 	defer session.Close()
-	database, err := d.getDatabase(session)
+	database, err := d.getDatabase(credentials, session)
 	if err != nil {
 		return err
 	}
@@ -139,14 +122,14 @@ func (d DataServiceMongoDB) Insert(id string, credentials string, value string) 
 	return d.insert(database, value)
 }
 
-func (d DataServiceMongoDB) Exists(id string, credentials string, value string) (exists bool, err error) {
-	session, err := d.getSession()
+func (d DataServiceMongoDB) Exists(credentials *Credentials, value string) (exists bool, err error) {
+	session, err := d.getSession(credentials)
 	if err != nil {
 		return false, err
 	}
 
 	defer session.Close()
-	database, err := d.getDatabase(session)
+	database, err := d.getDatabase(credentials, session)
 	if err != nil {
 		return false, err
 	}
@@ -154,14 +137,14 @@ func (d DataServiceMongoDB) Exists(id string, credentials string, value string) 
 	return d.exists(database, value)
 }
 
-func (d DataServiceMongoDB) Delete(id string, credentials string, value string) (err error) {
-	session, err := d.getSession()
+func (d DataServiceMongoDB) Delete(credentials *Credentials, value string) (err error) {
+	session, err := d.getSession(credentials)
 	if err != nil {
 		return err
 	}
 
 	defer session.Close()
-	database, err := d.getDatabase(session)
+	database, err := d.getDatabase(credentials, session)
 	if err != nil {
 		return err
 	}

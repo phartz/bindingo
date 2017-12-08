@@ -28,7 +28,13 @@ func GetStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := dataService.GetStatus()
+	credentials, err := GetCredentials(params["id"], params["credentials"])
+	if err != nil {
+		WriteResponse(w, "2", err.Error())
+		return
+	}
+
+	result, err := dataService.GetStatus(credentials)
 	if err != nil {
 		WriteResponse(w, "2", err.Error())
 		return
@@ -52,7 +58,13 @@ func Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dataService.Insert(params["name"])
+	credentials, err := GetCredentials(params["id"], params["credentials"])
+	if err != nil {
+		WriteResponse(w, "2", err.Error())
+		return
+	}
+
+	err = dataService.Insert(credentials, params["name"])
 	if err != nil {
 		WriteResponse(w, "2", err.Error())
 		return
@@ -70,7 +82,13 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = dataService.Delete(params["name"])
+	credentials, err := GetCredentials(params["id"], params["credentials"])
+	if err != nil {
+		WriteResponse(w, "2", err.Error())
+		return
+	}
+
+	err = dataService.Delete(credentials, params["name"])
 	if err != nil {
 		WriteResponse(w, "2", err.Error())
 		return
@@ -90,7 +108,13 @@ func Exists(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := dataService.Exists(params["name"])
+	credentials, err := GetCredentials(params["id"], params["credentials"])
+	if err != nil {
+		WriteResponse(w, "2", err.Error())
+		return
+	}
+
+	exists, err := dataService.Exists(credentials, params["name"])
 	if err != nil {
 		WriteResponse(w, "2", err.Error())
 		return
@@ -106,7 +130,7 @@ func Exists(w http.ResponseWriter, r *http.Request) {
 
 func WriteResponse(w http.ResponseWriter, value string, message string) {
 	t := time.Now()
-	fmt.Println(t.Format("20060102150405"))
+
 	result := Result{
 		TimeStamp: t.Format("20060102150405"),
 		Value:     value,
