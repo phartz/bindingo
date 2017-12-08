@@ -1,0 +1,6 @@
+---
+applications:
+  - name: bindingo
+    command: bindingo
+    env:
+      GOPACKAGENAME: github.com/phartz/bindingo
